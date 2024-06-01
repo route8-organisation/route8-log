@@ -29,4 +29,15 @@ target_include_directories(route8-log PUBLIC
     submodule/yaml-cpp/include/
     submodule/nlohmann-json/include/
 )
-target_link_libraries(route8-log yaml-cpp systemd)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(route8-log PRIVATE -Wall -Wextra -Wpedantic -Werror)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    target_compile_options(route8-log PRIVATE /W4 /WX)
+endif()
+
+target_link_libraries(route8-log yaml-cpp)
+
+if(NOT WIN32)
+    target_link_libraries(route8-log systemd)
+endif()
