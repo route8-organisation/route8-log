@@ -1,0 +1,23 @@
+name: Build Test
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: vex9/route8buildtest:latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submodule init
+        run: |
+          git config --global --add safe.directory /__w/route8-log/route8-log
+          git submodule update --init --recursive
+      - name: Flawfinder
+        run: flawfinder src
