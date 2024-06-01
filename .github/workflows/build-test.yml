@@ -38,14 +38,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install MinGW
+        run: |
+          choco install mingw -y
+      - name: Set up MinGW in PATH
+        run: |
+          echo "::add-path::C:\\tools\\mingw64\\bin"
       - name: Submodule init
         run: |
           git submodule update --init --recursive
       - name: Init
         run: |
           mkdir build
-      - name: MSVC
+      - name: Build with MinGW
         run: |
           cd build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
-          cmake --build .
+          cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ..
+          mingw32-make
