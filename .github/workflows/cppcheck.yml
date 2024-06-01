@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     container:
       image: vex9/route8buildtest:latest
@@ -20,4 +20,6 @@ jobs:
           git config --global --add safe.directory /__w/route8-log/route8-log
           git submodule update --init --recursive
       - name: Cppcheck
-        run: cppcheck --error-exitcode=1 src
+        run: |
+          ls
+          cppcheck --error-exitcode=1 src
