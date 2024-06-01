@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Submodule init
-        run: git submodule update --init --recursive
+        run: |
+          git config --global --add safe.directory /__w/route8-log/route8-log
+          git submodule update --init --recursive
       - name: Init
         run: |
           mkdir build
