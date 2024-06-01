@@ -1,0 +1,29 @@
+name: Build Test
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: vex9/route8buildtest:latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submodule init
+        run: git submodule update --init --recursive
+      - name: Init
+        run: |
+          mkdir build
+          cd build
+      - name: Clang
+        run: |
+          cmakle -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+          ninja
+      - name: GCC
+        run: |
+          cmakle -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ..
+          ninja
