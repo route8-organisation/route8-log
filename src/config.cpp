@@ -52,6 +52,8 @@ namespace config {
         LOAD_CONFIG_KEY_VALUE("verbose", config::field_verbose);
         LOAD_CONFIG_KEY_VALUE("dispatch_sleep_ms", config::field_dispatch_sleep_ms);
 
+        #undef LOAD_CONFIG_KEY_VALUE
+
         return true;
     }
 }

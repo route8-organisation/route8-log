@@ -8,8 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include <mutex>
-#include <concepts>
-#include <type_traits>
 
 #include "debug.hpp"
 
@@ -51,6 +49,7 @@ namespace debug {
         debug::g_stream_lock.lock();
 
         if (debug::g_stream.is_open()) {
+            // flawfinder: ignore
             auto nb_message{std::vsnprintf(debug::g_message_buffer.data(), debug::g_message_buffer.size(), format, va_args)};
 
             if (nb_message) {
@@ -63,6 +62,7 @@ namespace debug {
     }
 
     bool initialize() {
+        // flawfinder: ignore
         debug::g_stream.open(debug::g_stream_filename, std::ios_base::app);
 
         if (!debug::g_stream.is_open()) {

@@ -1,8 +1,3 @@
-#include "config.hpp"
-#include "coroutine.hpp"
-#include "debug.hpp"
-#include "nlohmann/json_fwd.hpp"
-#include "xlog.hpp"
 #include <chrono>
 #include <coroutine>
 #include <cstdint>
@@ -12,14 +7,24 @@
 #include <stdexcept>
 #include <string>
 #include <limits>
+
+#ifndef _WIN32 
 #include <systemd/sd-journal.h>
+#endif
+
 #include <tuple>
 #include <utility>
 #include <vector>
+#include "nlohmann/json_fwd.hpp"
 #include "nlohmann/json.hpp"
+#include "config.hpp"
+#include "coroutine.hpp"
+#include "debug.hpp"
+#include "xlog.hpp"
 
 namespace xlog {
     namespace journald {
+    #ifndef _WIN32 
         static sd_journal * g_journal_handle{nullptr};
         static std::optional<routine> g_worker_routine{};
 
@@ -120,10 +125,6 @@ namespace xlog {
             }
         }
 
-        bool platform_support() {
-            return true;
-        }
-
         bool start(std::string identifier) {
             auto result{sd_journal_open(&xlog::journald::g_journal_handle, SD_JOURNAL_LOCAL_ONLY)};
 
@@ -138,6 +139,15 @@ namespace xlog {
             debug::print("log-journal", "started");
 
             return true;
+        }
+    #endif
+
+        bool platform_support() {
+        #ifdef _WIN32
+            return false;
+        #else
+            return true;
+        #endif
         }
     }
 }
