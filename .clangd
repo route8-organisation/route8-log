@@ -1,0 +1,10 @@
+CompileFlags:
+  Add:
+    - "-Wall"
+    - "-Wextra"
+    - "-Wpedantic"
+    - "-Werror"
+    - "-std=c++20"
+    - "-I../submodule/yaml-cpp/include"
+    - "-I../submodule/nlohmann-json/include/"
+  Compiler: clang++
