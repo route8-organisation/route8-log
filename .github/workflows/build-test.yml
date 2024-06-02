@@ -44,7 +44,7 @@ jobs:
     - name: Init
       run: |
         mkdir build
-    - name: Build with MinGW
+    - name: Building
       run: |
         cd build
         cmake -G "Visual Studio 17 2022" ..

@@ -27,7 +27,7 @@ namespace debug {
         auto clock{std::chrono::system_clock::now()};
 
         auto time_now_ms{std::chrono::time_point_cast<std::chrono::milliseconds>(hires_clock)};
-        auto second_ms{time_now_ms.time_since_epoch().count() % 1000};
+        int64_t second_ms{time_now_ms.time_since_epoch().count() % 1000};
 
         std::time_t time_now{std::chrono::system_clock::to_time_t(clock)};
         std::tm tm_now{};
