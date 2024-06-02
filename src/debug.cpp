@@ -30,12 +30,18 @@ namespace debug {
         auto second_ms{time_now_ms.time_since_epoch().count() % 1000};
 
         std::time_t time_now{std::chrono::system_clock::to_time_t(clock)};
-        std::tm tm_now{*std::localtime(&time_now)};
+        
+        #ifdef _WIN32
+            std::tm tm_now{};
+            localtime_s(&tm_now, &time_now);
+        #else
+            std::tm tm_now{*localtime(&time_now)};
+        #endif
 
         std::array<char, 128> time_friendly{};
         std::strftime(time_friendly.data(), time_friendly.size(), "%Y-%m-%d %H:%M:%S", &tm_now);
 
-        auto nb_buffer{std::snprintf(debug::g_buffer.data(), debug::g_buffer.size(), "[%s.%ld][%s] %s\n", time_friendly.data(), second_ms, module, message.data())};
+        auto nb_buffer{std::snprintf(debug::g_buffer.data(), debug::g_buffer.size(), "[%s.%.03ld][%s] %s\n", time_friendly.data(), static_cast<long>(second_ms), module, message.data())};
 
         if (nb_buffer) {
             debug::g_stream.write(debug::g_buffer.data(), nb_buffer);

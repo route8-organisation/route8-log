@@ -1,0 +1,51 @@
+name: Build Test
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: vex9/route8buildtest:latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submodule init
+        run: |
+          git config --global --add safe.directory /__w/route8-log/route8-log
+          git submodule update --init --recursive
+      - name: Init
+        run: |
+          mkdir build
+      - name: Clang
+        run: |
+          cd build
+          cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+          ninja
+      - name: GCC
+        run: |
+          cd build
+          cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ..
+          ninja
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Submodule init
+      run: |
+        git submodule update --init --recursive
+    - name: Init
+      run: |
+        mkdir build
+    - name: Building
+      run: |
+        cd build
+        cmake -G "Visual Studio 17 2022" ..
+        cmake --build .

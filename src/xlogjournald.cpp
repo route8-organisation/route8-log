@@ -124,7 +124,15 @@ namespace xlog {
                 }
             }
         }
+    #endif
 
+    #ifdef _WIN32
+        bool start(std::string identifier) {
+            (void)(identifier);
+
+            return false;
+        }
+    #else
         bool start(std::string identifier) {
             auto result{sd_journal_open(&xlog::journald::g_journal_handle, SD_JOURNAL_LOCAL_ONLY)};
 
@@ -141,7 +149,7 @@ namespace xlog {
             return true;
         }
     #endif
-
+    
         bool platform_support() {
         #ifdef _WIN32
             return false;
