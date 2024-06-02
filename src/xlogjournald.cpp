@@ -67,7 +67,7 @@ namespace xlog {
                 auto split_idx{data.find_first_of('=')};
 
                 if (split_idx == std::string::npos) {
-                    debug::print("log-journald", "failed to split key value entry, error: missing '=' on '%s'", data.c_str());
+                    debug::print("log-journald", "failed to split key value entry, error: missing '=' on '{}'", data);
                     continue;
                 }
 
@@ -116,7 +116,7 @@ namespace xlog {
                         auto value{*entry};
 
                         if (config::field_verbose) {
-                            debug::print("log-journald", "journal message recevived, details: '%s'", std::get<2>(value).c_str());
+                            debug::print("log-journald", "journal message recevived, details: '{}'", std::get<2>(value));
                         }
 
                         xlog::queue::insert(value);
@@ -137,7 +137,7 @@ namespace xlog {
             auto result{sd_journal_open(&xlog::journald::g_journal_handle, SD_JOURNAL_LOCAL_ONLY)};
 
             if (result < 0) {
-                debug::print("log-journal", "failed to open the journal, error: %s", std::strerror(result));
+                debug::print("log-journal", "failed to open the journal, error: {}", std::strerror(result));
 
                 return false;
             }
