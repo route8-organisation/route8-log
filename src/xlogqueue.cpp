@@ -45,7 +45,7 @@ namespace xlog {
                     xlog::queue::g_queue.pop();
 
                     if (config::field_verbose) {
-                        debug::print("log-queue", "dispatching: identififer: '%s', timestamp: '%lld', message: '%s'", std::get<0>(entry).c_str(), std::get<1>(entry), std::get<2>(entry).c_str());
+                        debug::print("log-queue", "dispatching: identififer: '{}', timestamp: '{}', message: '{}'", std::get<0>(entry), std::get<1>(entry), std::get<2>(entry));
                     }
                 }
 

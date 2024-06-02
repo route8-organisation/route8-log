@@ -14,7 +14,7 @@ namespace config {
     static bool load_config_key(YAML::Node& config, const char* key_name, T& value) {
         if (config[key_name]) {
             if (!config[key_name].IsScalar()) {
-                debug::print("config", "key '%s' is not key-value", key_name);
+                debug::print("config", "key '{}' is not key-value", key_name);
 
                 return false;
             }
@@ -22,7 +22,7 @@ namespace config {
             try {
                 value = config[key_name].as<T>();
             } catch (const std::exception& e) {
-                debug::print("config", "failed to load key '%s', error: %s", key_name, e.what());
+                debug::print("config", "failed to load key '{}', error: {}", key_name, e.what());
 
                 return false;
             }

@@ -45,7 +45,7 @@ namespace xlog {
                 try {
                     identifier = config["identifier"].as<std::string>();
                 } catch (const std::exception& e) {
-                    debug::print("log", "failed to load key 'identifier', error: %s", e.what());
+                    debug::print("log", "failed to load key 'identifier', error: {}", e.what());
 
                     return false;
                 }
@@ -63,7 +63,7 @@ namespace xlog {
             auto lookup_entry{xlog::g_lookup_table.find(key_name)};
 
             if (lookup_entry == xlog::g_lookup_table.end()) {
-                debug::print("log", "unknown logging type '%s'", key_name.c_str());
+                debug::print("log", "unknown logging type '{}'", key_name);
 
                 return false;
             }
@@ -85,7 +85,7 @@ namespace xlog {
             auto lookup_entry{xlog::g_lookup_table.find(key_name)};
 
             if (lookup_entry == xlog::g_lookup_table.end()) {
-                debug::print("log", "unknown logging type '%s'", key_name.c_str());
+                debug::print("log", "unknown logging type '{}'", key_name);
 
                 return false;
             }
@@ -106,7 +106,7 @@ namespace xlog {
         try {
             config = YAML::LoadFile(xlog::g_filename);
         } catch (const std::exception& e) {
-            debug::print("log", "failed to load config file '%s', error: %s", xlog::g_filename, e.what());
+            debug::print("log", "failed to load config file '{}', error: {}", xlog::g_filename, e.what());
             return false;
         }
 
