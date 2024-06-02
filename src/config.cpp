@@ -39,7 +39,7 @@ namespace config {
         try {
             config = YAML::LoadFile(g_filename);
         } catch (const std::exception& e) {
-            debug::print("config", "failed to load config file '%s', error: %s", g_filename, e.what());
+            debug::print("config", "failed to load config file '{}', error: {}", g_filename, e.what());
             return false;
         }
 

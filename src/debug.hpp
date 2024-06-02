@@ -19,7 +19,7 @@ namespace debug {
         const std::lock_guard<std::mutex> _lock(debug::g_stream_lock);
 
         if (debug::g_stream.is_open()) {
-            std::string_view message{std::vformat(format, std::make_format_args(args...))};
+            std::string message{std::vformat(format, std::make_format_args(args...))};
 
             if (!message.empty()) {
                 auto hires_clock{std::chrono::high_resolution_clock::now()};
@@ -39,7 +39,7 @@ namespace debug {
 
                 std::stringstream time_friendly{};
                 time_friendly << std::put_time(&tm_now, "%Y-%m-%d %H:%M:%S");
-                std::string_view debug_message{std::format("[{}.{:03}][{}] {}", time_friendly.view(), second_ms, module, message)};
+                std::string debug_message{std::format("[{}.{:03}][{}] {}\n", time_friendly.view(), second_ms, module, message)};
 
                 if (!debug_message.empty()) {
                     debug::g_stream.write(debug_message.data(), debug_message.length());
