@@ -13,6 +13,11 @@ namespace xlog {
         bool platform_support();
     }
 
+    namespace winevent {
+        bool start(std::string identifier, std::string source_name);
+        bool platform_support();
+    }
+
     namespace queue {
         using log_entry_t = std::tuple<std::string, int64_t, std::string>;
 

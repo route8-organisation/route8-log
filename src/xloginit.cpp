@@ -26,13 +26,13 @@ namespace xlog {
                 }
 
                 if (!config["identifier"]) {
-                    debug::print("log", "journal entry is missing key identifier");
+                    debug::print("log", "journal entry is missing key 'identifier'");
 
                     return false;
                 }
 
                 if (!config["identifier"].IsScalar()) {
-                    debug::print("log", "journal entry is not key-value type");
+                    debug::print("log", "journal entry's 'identifier' is not key-value type");
 
                     return false;
                 }
@@ -51,6 +51,63 @@ namespace xlog {
                 }
 
                 return xlog::journald::start(identifier);
+            },
+        }},
+        { "winevent", {
+            .check = [](const YAML::Node& config) -> bool {
+                if (!xlog::winevent::platform_support()) {
+                    debug::print("log", "winevent is not supported on this platform");
+
+                    return false;
+                }
+
+                if (!config["identifier"]) {
+                    debug::print("log", "winevent entry is missing key 'identifier'");
+
+                    return false;
+                }
+
+                if (!config["source"]) {
+                    debug::print("log", "winevent entry is missing key 'source'");
+
+                    return false;
+                }
+
+                if (!config["identifier"].IsScalar()) {
+                    debug::print("log", "winevent entry's 'identifier' is not key-value type");
+
+                    return false;
+                }
+
+                if (!config["source"].IsScalar()) {
+                    debug::print("log", "winevent entry's 'source' is not key-value type");
+
+                    return false;
+                }
+
+                return true;
+            },
+            .setup = [](const YAML::Node& config) -> bool {
+                std::string identifier{};
+                std::string source{};
+
+                try {
+                    identifier = config["identifier"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'identifier', error: {}", e.what());
+
+                    return false;
+                }
+
+                try {
+                    source = config["source"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'source', error: {}", e.what());
+
+                    return false;
+                }
+
+                return xlog::winevent::start(identifier, source);
             },
         }}
     };
