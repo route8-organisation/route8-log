@@ -62,7 +62,7 @@ namespace xlog {
                     sd_journal_get_cursor(xlog::journald::g_journal_handle, &initial_cursor);
                 }
 
-                int wait_result{this->result_value=sd_journal_wait(xlog::journald::g_journal_handle, std::numeric_limits<int64_t>::max())};
+                int wait_result{sd_journal_wait(xlog::journald::g_journal_handle, std::numeric_limits<int64_t>::max())};
 
                 if (wait_result == SD_JOURNAL_APPEND) {
                     std::vector<xlog::queue::log_entry_t> entries{};
