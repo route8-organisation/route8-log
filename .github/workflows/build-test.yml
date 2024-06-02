@@ -33,25 +33,19 @@ jobs:
           cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ..
           ninja
 
-#  build-windows:
-#    runs-on: windows-latest
+  build-windows:
+    runs-on: windows-latest
 
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Install MinGW
-#        run: |
-#          choco install mingw -y
-#      - name: Set up MinGW in PATH
-#        run: |
-#          echo "::add-path::C:\\tools\\mingw64\\bin"
-#      - name: Submodule init
-#        run: |
-#          git submodule update --init --recursive
-#      - name: Init
-#        run: |
-#          mkdir build
-#      - name: Build with MinGW
-#        run: |
-#          cd build
-#          cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ..
-#          mingw32-make
+    steps:
+    - uses: actions/checkout@v4
+    - name: Submodule init
+      run: |
+        git submodule update --init --recursive
+    - name: Init
+      run: |
+        mkdir build
+    - name: Build with MinGW
+      run: |
+        cd build
+        cmake -G "Visual Studio 17 2022" ..
+        cmake --build .
