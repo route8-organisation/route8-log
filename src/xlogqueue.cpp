@@ -2,9 +2,9 @@
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <future>
 #include "config.hpp"
 #include "coroutine"
-#include "coroutine.hpp"
 #include "debug.hpp"
 #include "xlog.hpp"
 
@@ -12,7 +12,7 @@ namespace xlog {
     namespace queue {
         static std::queue<xlog::queue::log_entry_t> g_queue{};
         static std::mutex g_queue_lock{};
-        static std::optional<routine> g_worker_handle{};
+        static std::optional<std::future<void>> g_worker_handle{};
 
         void insert(const xlog::queue::log_entry_t& data) {
             xlog::queue::g_queue_lock.lock();
@@ -20,25 +20,10 @@ namespace xlog {
             xlog::queue::g_queue_lock.unlock();
         }
 
-        struct lock_queue_routine {
-            bool await_ready() const {
-                return false;
-            }
-
-            void await_suspend(std::coroutine_handle<> handle) const {
-                std::thread([handle]() {
-                    xlog::queue::g_queue_lock.lock();
-                    handle.resume();
-                }).detach();
-            }
-
-            void await_resume() const {}
-        };
-
-        static routine worker() {
+        static void worker() {
             while (true) {
-                co_await sleep_routine{std::chrono::milliseconds(config::field_dispatch_sleep_ms)};
-                co_await lock_queue_routine{};
+                std::this_thread::sleep_for(std::chrono::milliseconds(config::field_dispatch_sleep_ms));
+                std::lock_guard<std::mutex> scope_lock(xlog::queue::g_queue_lock);
 
                 while (!xlog::queue::g_queue.empty()) {
                     xlog::queue::log_entry_t entry{xlog::queue::g_queue.front()};
@@ -49,14 +34,12 @@ namespace xlog {
                     }
                 }
 
-                xlog::queue::g_queue_lock.unlock();
+                (void)(scope_lock);
             }
-
-            co_return;
         }
 
         bool start() {
-            xlog::queue::g_worker_handle = std::make_optional(xlog::queue::worker());
+            xlog::queue::g_worker_handle = std::make_optional(std::async(xlog::queue::worker));
             debug::print("log-journal", "queue started");
 
             return true;
