@@ -15,6 +15,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <future>
 #include "nlohmann/json_fwd.hpp"
 #include "nlohmann/json.hpp"
 #include "config.hpp"
