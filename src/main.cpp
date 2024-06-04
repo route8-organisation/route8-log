@@ -1,8 +1,10 @@
 #include <chrono>
+#include <exception>
 #include <iostream>
 #include <thread>
 #include "debug.hpp"
 #include "config.hpp"
+#include "filenotify.hpp"
 #include "xlog.hpp"
 
 int main() {
