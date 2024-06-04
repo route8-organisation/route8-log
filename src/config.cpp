@@ -9,12 +9,13 @@ namespace config {
 
     bool field_verbose{false};
     int64_t field_dispatch_sleep_ms{2000};
+    size_t field_maximum_log_entries{8*1024};
 
     template<typename T>
     static bool load_config_key(YAML::Node& config, const char* key_name, T& value) {
         if (config[key_name]) {
             if (!config[key_name].IsScalar()) {
-                debug::print("config", "key '%s' is not key-value", key_name);
+                debug::print("config", "key '{}' is not key-value", key_name);
 
                 return false;
             }
@@ -22,7 +23,7 @@ namespace config {
             try {
                 value = config[key_name].as<T>();
             } catch (const std::exception& e) {
-                debug::print("config", "failed to load key '%s', error: %s", key_name, e.what());
+                debug::print("config", "failed to load key '{}', error: {}", key_name, e.what());
 
                 return false;
             }
@@ -39,7 +40,7 @@ namespace config {
         try {
             config = YAML::LoadFile(g_filename);
         } catch (const std::exception& e) {
-            debug::print("config", "failed to load config file '%s', error: %s", g_filename, e.what());
+            debug::print("config", "failed to load config file '{}', error: {}", g_filename, e.what());
             return false;
         }
 
@@ -51,6 +52,7 @@ namespace config {
 
         LOAD_CONFIG_KEY_VALUE("verbose", config::field_verbose);
         LOAD_CONFIG_KEY_VALUE("dispatch_sleep_ms", config::field_dispatch_sleep_ms);
+        LOAD_CONFIG_KEY_VALUE("maximum_log_entries", config::field_maximum_log_entries);
 
         #undef LOAD_CONFIG_KEY_VALUE
 

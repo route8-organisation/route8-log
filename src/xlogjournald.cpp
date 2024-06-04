@@ -15,10 +15,10 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <future>
 #include "nlohmann/json_fwd.hpp"
 #include "nlohmann/json.hpp"
 #include "config.hpp"
-#include "coroutine.hpp"
 #include "debug.hpp"
 #include "xlog.hpp"
 
@@ -26,35 +26,7 @@ namespace xlog {
     namespace journald {
     #ifndef _WIN32 
         static sd_journal * g_journal_handle{nullptr};
-        static std::optional<routine> g_worker_routine{};
-
-        struct journal_wait_routine {
-            sd_journal * journal_handle{nullptr};
-            int mutable result_value{0};
-
-            journal_wait_routine(sd_journal* value) {
-                if (!value) {
-                    throw std::runtime_error("journal_handle is null");
-                }
-
-                this->journal_handle = value;
-            }
-
-            bool await_ready() const {
-                return false;
-            }
-
-            void await_suspend(std::coroutine_handle<> handle) const {
-                std::thread([this, handle]() {
-                    this->result_value=sd_journal_wait(journal_handle, std::numeric_limits<int64_t>::max());
-                    handle.resume();
-                }).detach();
-            }
-
-            int await_resume() const {
-                return this->result_value;
-            }
-        };
+        static std::optional<std::future<void>> g_worker_routine{};
 
         static bool journal_entry_procedure(sd_journal* journal, std::pair<int64_t, std::string>& result) {
             size_t data_nb{0};
@@ -67,7 +39,7 @@ namespace xlog {
                 auto split_idx{data.find_first_of('=')};
 
                 if (split_idx == std::string::npos) {
-                    debug::print("log-journald", "failed to split key value entry, error: missing '=' on '%s'", data.c_str());
+                    debug::print("log-journald", "failed to split key value entry, error: missing '=' on '{}'", data);
                     continue;
                 }
 
@@ -81,7 +53,7 @@ namespace xlog {
             return true;
         }
 
-        static routine worker(std::string identifier) {
+        static void worker(std::string identifier) {
             while (true) {
                 char* initial_cursor{nullptr};
                 sd_journal_seek_tail(xlog::journald::g_journal_handle);
@@ -90,7 +62,7 @@ namespace xlog {
                     sd_journal_get_cursor(xlog::journald::g_journal_handle, &initial_cursor);
                 }
 
-                int wait_result{co_await xlog::journald::journal_wait_routine{xlog::journald::g_journal_handle}};
+                int wait_result{sd_journal_wait(xlog::journald::g_journal_handle, std::numeric_limits<int64_t>::max())};
 
                 if (wait_result == SD_JOURNAL_APPEND) {
                     std::vector<xlog::queue::log_entry_t> entries{};
@@ -116,7 +88,7 @@ namespace xlog {
                         auto value{*entry};
 
                         if (config::field_verbose) {
-                            debug::print("log-journald", "journal message recevived, details: '%s'", std::get<2>(value).c_str());
+                            debug::print("log-journald", "journal message recevived, details: '{}'", std::get<2>(value));
                         }
 
                         xlog::queue::insert(value);
@@ -124,24 +96,38 @@ namespace xlog {
                 }
             }
         }
+    #endif
 
+    #ifdef _WIN32
         bool start(std::string identifier) {
-            auto result{sd_journal_open(&xlog::journald::g_journal_handle, SD_JOURNAL_LOCAL_ONLY)};
+            (void)(identifier);
 
-            if (result < 0) {
-                debug::print("log-journal", "failed to open the journal, error: %s", std::strerror(result));
+            return false;
+        }
+    #else
+        bool start(std::string identifier) {
+            if (g_worker_routine.has_value()) {
+                debug::print("log-journal", "already running");
 
                 return false;
             }
 
-            xlog::journald::g_worker_routine = std::make_optional(xlog::journald::worker(identifier));
+            auto result{sd_journal_open(&xlog::journald::g_journal_handle, SD_JOURNAL_LOCAL_ONLY)};
+
+            if (result < 0) {
+                debug::print("log-journal", "failed to open the journal, error: {}", std::strerror(result));
+
+                return false;
+            }
+
+            xlog::journald::g_worker_routine = std::make_optional(std::async(xlog::journald::worker, identifier));
 
             debug::print("log-journal", "started");
 
             return true;
         }
     #endif
-
+    
         bool platform_support() {
         #ifdef _WIN32
             return false;

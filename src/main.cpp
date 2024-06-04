@@ -1,15 +1,16 @@
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include "debug.hpp"
 #include "config.hpp"
 #include "xlog.hpp"
 
+#include "filenotify.hpp"
+
 int main() {
     if (!debug::initialize()) {
         std::cerr << "failed to initialize the debug module; aborting!";
-        std::abort();
+
         return -1;
     }
 
@@ -29,5 +30,5 @@ int main() {
 
     for (;;) {std::this_thread::sleep_for(std::chrono::seconds(10));}
 
-    return 0;
+    // return 0;
 }

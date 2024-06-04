@@ -26,13 +26,13 @@ namespace xlog {
                 }
 
                 if (!config["identifier"]) {
-                    debug::print("log", "journal entry is missing key identifier");
+                    debug::print("log", "journal entry is missing key 'identifier'");
 
                     return false;
                 }
 
                 if (!config["identifier"].IsScalar()) {
-                    debug::print("log", "journal entry is not key-value type");
+                    debug::print("log", "journal entry's 'identifier' is not key-value type");
 
                     return false;
                 }
@@ -45,12 +45,69 @@ namespace xlog {
                 try {
                     identifier = config["identifier"].as<std::string>();
                 } catch (const std::exception& e) {
-                    debug::print("log", "failed to load key 'identifier', error: %s", e.what());
+                    debug::print("log", "failed to load key 'identifier', error: {}", e.what());
 
                     return false;
                 }
 
                 return xlog::journald::start(identifier);
+            },
+        }},
+        { "winevent", {
+            .check = [](const YAML::Node& config) -> bool {
+                if (!xlog::winevent::platform_support()) {
+                    debug::print("log", "winevent is not supported on this platform");
+
+                    return false;
+                }
+
+                if (!config["identifier"]) {
+                    debug::print("log", "winevent entry is missing key 'identifier'");
+
+                    return false;
+                }
+
+                if (!config["source"]) {
+                    debug::print("log", "winevent entry is missing key 'source'");
+
+                    return false;
+                }
+
+                if (!config["identifier"].IsScalar()) {
+                    debug::print("log", "winevent entry's 'identifier' is not key-value type");
+
+                    return false;
+                }
+
+                if (!config["source"].IsScalar()) {
+                    debug::print("log", "winevent entry's 'source' is not key-value type");
+
+                    return false;
+                }
+
+                return true;
+            },
+            .setup = [](const YAML::Node& config) -> bool {
+                std::string identifier{};
+                std::string source{};
+
+                try {
+                    identifier = config["identifier"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'identifier', error: {}", e.what());
+
+                    return false;
+                }
+
+                try {
+                    source = config["source"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'source', error: {}", e.what());
+
+                    return false;
+                }
+
+                return xlog::winevent::start(identifier, source);
             },
         }}
     };
@@ -63,7 +120,7 @@ namespace xlog {
             auto lookup_entry{xlog::g_lookup_table.find(key_name)};
 
             if (lookup_entry == xlog::g_lookup_table.end()) {
-                debug::print("log", "unknown logging type '%s'", key_name.c_str());
+                debug::print("log", "unknown logging type '{}'", key_name);
 
                 return false;
             }
@@ -85,7 +142,7 @@ namespace xlog {
             auto lookup_entry{xlog::g_lookup_table.find(key_name)};
 
             if (lookup_entry == xlog::g_lookup_table.end()) {
-                debug::print("log", "unknown logging type '%s'", key_name.c_str());
+                debug::print("log", "unknown logging type '{}'", key_name);
 
                 return false;
             }
@@ -106,7 +163,7 @@ namespace xlog {
         try {
             config = YAML::LoadFile(xlog::g_filename);
         } catch (const std::exception& e) {
-            debug::print("log", "failed to load config file '%s', error: %s", xlog::g_filename, e.what());
+            debug::print("log", "failed to load config file '{}', error: {}", xlog::g_filename, e.what());
             return false;
         }
 
