@@ -4,7 +4,6 @@
 #include <queue>
 #include <future>
 #include "config.hpp"
-#include "coroutine"
 #include "debug.hpp"
 #include "xlog.hpp"
 
@@ -16,6 +15,12 @@ namespace xlog {
 
         void insert(const xlog::queue::log_entry_t& data) {
             xlog::queue::g_queue_lock.lock();
+
+            if (g_queue.size() >= config::field_maximum_log_entries) {
+                debug::print("log-queue", "the limit of {} log entries has been reached, popping oldest log", config::field_maximum_log_entries);
+                xlog::queue::g_queue.pop();
+            }
+
             xlog::queue::g_queue.push(data);
             xlog::queue::g_queue_lock.unlock();
         }
@@ -32,6 +37,8 @@ namespace xlog {
                     if (config::field_verbose) {
                         debug::print("log-queue", "dispatching: identififer: '{}', timestamp: '{}', message: '{}'", std::get<0>(entry), std::get<1>(entry), std::get<2>(entry));
                     }
+
+                    // TODO: try to send the entries in a batch
                 }
 
                 (void)(scope_lock);
