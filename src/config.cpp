@@ -9,6 +9,7 @@ namespace config {
 
     bool field_verbose{false};
     int64_t field_dispatch_sleep_ms{2000};
+    size_t field_maximum_log_entries{8*1024};
 
     template<typename T>
     static bool load_config_key(YAML::Node& config, const char* key_name, T& value) {
@@ -51,6 +52,7 @@ namespace config {
 
         LOAD_CONFIG_KEY_VALUE("verbose", config::field_verbose);
         LOAD_CONFIG_KEY_VALUE("dispatch_sleep_ms", config::field_dispatch_sleep_ms);
+        LOAD_CONFIG_KEY_VALUE("maximum_log_entries", config::field_maximum_log_entries);
 
         #undef LOAD_CONFIG_KEY_VALUE
 
