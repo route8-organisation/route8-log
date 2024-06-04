@@ -5,6 +5,8 @@
 #include "config.hpp"
 #include "xlog.hpp"
 
+#include "filenotify.hpp"
+
 int main() {
     if (!debug::initialize()) {
         std::cerr << "failed to initialize the debug module; aborting!";
