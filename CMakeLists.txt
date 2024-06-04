@@ -12,6 +12,7 @@ set(SOURCES
     src/main.cpp
     src/debug.cpp
     src/config.cpp
+    src/filenotify.cpp
     src/xloginit.cpp
     src/xlogqueue.cpp
     src/xlogjournald.cpp
