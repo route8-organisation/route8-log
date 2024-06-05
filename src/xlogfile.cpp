@@ -48,7 +48,7 @@ namespace xlog {
                             debug::print("log-file", "failed to seek to previus position, setting to 0");
                         }
 
-                        char chr{0};
+                        int chr{0};
                         std::string blob{};
 
                         while (true) {
@@ -61,7 +61,7 @@ namespace xlog {
                             if (!chr) { continue; }
                             if (chr == '\r') { continue; }
 
-                            blob.push_back(chr);
+                            blob.push_back(static_cast<char>(chr));
                         }
 
                         file_stream.clear();
