@@ -91,7 +91,7 @@ namespace xlog {
                     }
                 }
             } catch (const std::exception& e) {
-                debug::print("log-file", "error occured while working on file '{}', stopping worker", source_filename);
+                debug::print("log-file", "error occured while working on file '{}'; error: {}; stopping worker", source_filename, e.what());
             }
 
             (void)(identifier);
