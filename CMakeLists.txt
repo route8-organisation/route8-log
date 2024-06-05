@@ -17,6 +17,7 @@ set(SOURCES
     src/xlogqueue.cpp
     src/xlogjournald.cpp
     src/xlogwinevent.cpp
+    src/xlogfile.cpp
 )
 
 add_executable(route8-log ${SOURCES})

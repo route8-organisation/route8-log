@@ -165,7 +165,7 @@ namespace xlog {
                                         {"description", description.str()},
                                     };
 
-                                    auto timestamp = static_cast<int64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+                                    auto timestamp{static_cast<int64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
                                     entries.push_back(std::make_tuple(identifier, timestamp, data.dump()));
                                 } catch (const std::exception& e) {
                                     debug::print("log-winevent", "corrupted record, error: {}", e.what());
