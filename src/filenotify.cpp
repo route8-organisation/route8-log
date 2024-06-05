@@ -50,10 +50,6 @@ bool filenotify::wait() {
 
             if (wide_filename == affected_filename) {
                 if (fni->Action == FILE_ACTION_MODIFIED) {
-                    if (config::field_verbose) {
-                        debug::print("filenotify", "detected modification on '{}'", this->full_path);
-                    }
-
                     return true;
                 }
             }
@@ -119,10 +115,6 @@ bool filenotify::wait() {
             const inotify_event* event{reinterpret_cast<inotify_event*>(ptr)};
 
             if (this->filename == event->name) {
-                if (config::field_verbose) {
-                    debug::print("filenotify", "detected modification on '{}'", this->full_path);
-                }
-
                 return true;
             }
         }

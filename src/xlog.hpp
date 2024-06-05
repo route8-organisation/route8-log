@@ -8,6 +8,13 @@
 namespace xlog {
     bool initialize();
 
+    namespace queue {
+        using log_entry_t = std::tuple<std::string, int64_t, std::string>;
+
+        bool start();
+        void insert(const log_entry_t& data);
+    }
+
     namespace journald {
         bool start(std::string identifier);
         bool platform_support();
@@ -18,11 +25,8 @@ namespace xlog {
         bool platform_support();
     }
 
-    namespace queue {
-        using log_entry_t = std::tuple<std::string, int64_t, std::string>;
-
-        bool start();
-        void insert(const log_entry_t& data);
+    namespace file {
+        bool start(std::string identifier, std::string source_filename);
     }
 }
 

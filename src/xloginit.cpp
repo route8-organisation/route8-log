@@ -109,6 +109,57 @@ namespace xlog {
 
                 return xlog::winevent::start(identifier, source);
             },
+        }},
+        { "file", {
+            .check = [](const YAML::Node& config) -> bool {
+                if (!config["identifier"]) {
+                    debug::print("log", "file entry is missing key 'identifier'");
+
+                    return false;
+                }
+
+                if (!config["source"]) {
+                    debug::print("log", "file entry is missing key 'source'");
+
+                    return false;
+                }
+
+                if (!config["identifier"].IsScalar()) {
+                    debug::print("log", "file entry's 'identifier' is not key-value type");
+
+                    return false;
+                }
+
+                if (!config["source"].IsScalar()) {
+                    debug::print("log", "file entry's 'source' is not key-value type");
+
+                    return false;
+                }
+
+                return true;
+            },
+            .setup = [](const YAML::Node& config) -> bool {
+                std::string identifier{};
+                std::string source{};
+
+                try {
+                    identifier = config["identifier"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'identifier', error: {}", e.what());
+
+                    return false;
+                }
+
+                try {
+                    source = config["source"].as<std::string>();
+                } catch (const std::exception& e) {
+                    debug::print("log", "failed to load key 'source', error: {}", e.what());
+
+                    return false;
+                }
+
+                return xlog::file::start(identifier, source);
+            },
         }}
     };
 
