@@ -1,6 +1,0 @@
-[submodule "submodule/yaml-cpp"]
-	path = submodule/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp
-[submodule "submodule/nlohmann-json"]
-	path = submodule/nlohmann-json
-	url = https://github.com/nlohmann/json
