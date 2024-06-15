@@ -1,17 +1,25 @@
+#[allow(unused_imports)]
 use anyhow::{anyhow, Context};
+#[allow(unused_imports)]
 use chrono::TimeZone;
+#[allow(unused_imports)]
 use once_cell::sync::Lazy;
+#[allow(unused_imports)]
 use serde_json::json;
 
+#[cfg(unix)]
 use crate::{config, errorln, log_queue, outputln};
 
+#[cfg(unix)]
 static RUNNING_CHECK: Lazy<tokio::sync::Mutex<bool>> = Lazy::new(||
     tokio::sync::Mutex::new(false)
 );
 
+#[cfg(unix)]
 static mut VERBOSE: Option<bool> = None;
 
 // journald crate is not tokio aware
+#[cfg(unix)]
 fn worker_thread(tokio_runtime: tokio::runtime::Handle, identity: String) -> anyhow::Result<()> {
     outputln!("journald", "starting journald log watcher with identity '{}'", identity);
 
@@ -62,6 +70,7 @@ fn worker_thread(tokio_runtime: tokio::runtime::Handle, identity: String) -> any
     }
 }
 
+#[cfg(unix)]
 pub async fn start(identity: String) -> anyhow::Result<()> {
     let mut running_check = RUNNING_CHECK.lock().await;
 
@@ -83,6 +92,12 @@ pub async fn start(identity: String) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(windows)]
+pub async fn start(_identity: String) -> anyhow::Result<()> {
+    Err(anyhow!("platform not supported"))
+}
+
+#[cfg(unix)]
 pub async fn initialize() {
     let config_clone = config::get_clone().await;
 
@@ -90,3 +105,6 @@ pub async fn initialize() {
         VERBOSE = Some(config_clone.verbose);
     }
 }
+
+#[cfg(windows)]
+pub async fn initialize() {}
