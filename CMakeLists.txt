@@ -5,6 +5,9 @@ add_subdirectory(submodule/nlohmann-json)
 
 project(route8-log VERSION 0.1)
 
+find_package(Boost REQUIRED)
+find_package(OpenSSL REQUIRED)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -12,6 +15,7 @@ set(SOURCES
     src/main.cpp
     src/debug.cpp
     src/config.cpp
+    src/inet.cpp
     src/filenotify.cpp
     src/xloginit.cpp
     src/xlogqueue.cpp
@@ -33,7 +37,7 @@ target_include_directories(route8-log PUBLIC
     submodule/nlohmann-json/include/
 )
 
-target_link_libraries(route8-log yaml-cpp)
+target_link_libraries(route8-log yaml-cpp ${OPENSSL_LIBRARIES} ${BOOST_LIBRARIES})
 
 if (NOT WIN32)
     target_link_libraries(route8-log systemd)
