@@ -32,9 +32,11 @@ namespace config {
 
                 return false;
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     bool initialize() {
@@ -51,6 +53,7 @@ namespace config {
 
         #define LOAD_CONFIG_KEY_VALUE(KEY_NAME, VARIABLE) { \
             if (!load_config_key(config, KEY_NAME, VARIABLE)) { \
+                debug::print("config", "failed to load key '{}'", KEY_NAME); \
                 return false; \
             } \
         }
