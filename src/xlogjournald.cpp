@@ -8,7 +8,7 @@
 #include <string>
 #include <limits>
 
-#ifndef _WIN32 
+#ifndef _WIN32
 #include <systemd/sd-journal.h>
 #endif
 
@@ -24,7 +24,7 @@
 
 namespace xlog {
     namespace journald {
-    #ifndef _WIN32 
+    #ifndef _WIN32
         static sd_journal * g_journal_handle{nullptr};
         static std::optional<std::future<void>> g_worker_routine{};
 
@@ -39,7 +39,7 @@ namespace xlog {
                 auto split_idx{data.find_first_of('=')};
 
                 if (split_idx == std::string::npos) {
-                    debug::print("log-journald", "failed to split key value entry, error: missing '=' on '{}'", data);
+                    debug::print("journald", "failed to split key value entry, error: missing '=' on '{}'", data);
                     continue;
                 }
 
@@ -88,7 +88,7 @@ namespace xlog {
                         auto value{*entry};
 
                         if (config::field_verbose) {
-                            debug::print("log-journald", "journal message recevived, details: '{}'", std::get<2>(value));
+                            debug::print("journald", "journal message recevived, details: '{}'", std::get<2>(value));
                         }
 
                         xlog::queue::insert(value);
@@ -127,7 +127,7 @@ namespace xlog {
             return true;
         }
     #endif
-    
+
         bool platform_support() {
         #ifdef _WIN32
             return false;

@@ -45,7 +45,7 @@ namespace xlog {
                             file_stream.clear();
                             file_stream.seekg(0);
 
-                            debug::print("log-file", "failed to seek to previus position, setting to 0");
+                            debug::print("file", "failed to seek to previus position, setting to 0");
                         }
 
                         int chr{0};
@@ -77,7 +77,7 @@ namespace xlog {
 
                             while (std::getline(blob_stream, line)) {
                                 if (config::field_verbose) {
-                                    debug::print("log-file", "detected line from '{}': '{}'", source_filename, line);
+                                    debug::print("file", "detected line from '{}': '{}'", source_filename, line);
                                 }
 
                                 auto timestamp{static_cast<int64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
@@ -86,12 +86,12 @@ namespace xlog {
                         }
 
                     } else {
-                        debug::print("log-file", "failed to open file '{}' for reading", source_filename);
+                        debug::print("file", "failed to open file '{}' for reading", source_filename);
                         return;
                     }
                 }
             } catch (const std::exception& e) {
-                debug::print("log-file", "error occured while working on file '{}'; error: {}; stopping worker", source_filename, e.what());
+                debug::print("file", "error occured while working on file '{}'; error: {}; stopping worker", source_filename, e.what());
             }
 
             (void)(identifier);
@@ -99,7 +99,7 @@ namespace xlog {
 
         bool start(std::string identifier, std::string source_filename) {
             xlog::file::g_worker_list.push_back(std::async(xlog::file::worker, identifier, source_filename));
-            debug::print("log-file", "started on file '{}'", source_filename);
+            debug::print("file", "started on file '{}'", source_filename);
 
             return false;
         }

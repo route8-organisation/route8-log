@@ -6,6 +6,7 @@
 #include "config.hpp"
 #include "debug.hpp"
 #include "xlog.hpp"
+#include "inet.hpp"
 
 namespace xlog {
     namespace queue {
@@ -17,7 +18,7 @@ namespace xlog {
             xlog::queue::g_queue_lock.lock();
 
             if (g_queue.size() >= config::field_maximum_log_entries) {
-                debug::print("log-queue", "the limit of {} log entries has been reached, popping oldest log", config::field_maximum_log_entries);
+                debug::print("queue", "the limit of {} log entries has been reached, popping oldest log", config::field_maximum_log_entries);
                 xlog::queue::g_queue.pop();
             }
 
@@ -32,13 +33,16 @@ namespace xlog {
 
                 while (!xlog::queue::g_queue.empty()) {
                     xlog::queue::log_entry_t entry{xlog::queue::g_queue.front()};
-                    xlog::queue::g_queue.pop();
 
                     if (config::field_verbose) {
-                        debug::print("log-queue", "dispatching: identififer: '{}', timestamp: '{}', message: '{}'", std::get<0>(entry), std::get<1>(entry), std::get<2>(entry));
+                        debug::print("queue", "dispatching: identififer: '{}', timestamp: '{}', message: '{}'", std::get<0>(entry), std::get<1>(entry), std::get<2>(entry));
                     }
 
-                    // TODO: try to send the entries in a batch
+                    if (!inet::send_log(std::get<0>(entry), std::get<1>(entry), std::get<2>(entry))) {
+                        debug::print("queue", "not connected: can't send");
+                    }
+
+                    xlog::queue::g_queue.pop();
                 }
 
                 (void)(scope_lock);
