@@ -4,8 +4,7 @@
 #include "debug.hpp"
 #include "config.hpp"
 #include "xlog.hpp"
-
-#include "filenotify.hpp"
+#include "inet.hpp"
 
 int main() {
     if (!debug::initialize()) {
@@ -28,7 +27,9 @@ int main() {
         return -4;
     }
 
-    for (;;) {std::this_thread::sleep_for(std::chrono::seconds(10));}
+    inet::connect();
+
+    // for (;;) {std::this_thread::sleep_for(std::chrono::seconds(10));}
 
     // return 0;
 }

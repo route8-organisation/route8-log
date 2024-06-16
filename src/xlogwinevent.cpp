@@ -45,13 +45,13 @@ namespace xlog {
                         result = buffer;
                     } else {
                         status = GetLastError();
-                        debug::print("log-winevent", "failed to read an event record, error: 0x{:08X}", status);
+                        debug::print("winevent", "failed to read an event record, error: 0x{:08X}", status);
 
                         delete[] buffer;
                     }
                 } else {
                     if (status != ERROR_HANDLE_EOF) {
-                        debug::print("log-winevent", "failed to read an event record, error: 0x{:08X}", status);
+                        debug::print("winevent", "failed to read an event record, error: 0x{:08X}", status);
                     }
                 }
             }
@@ -64,12 +64,12 @@ namespace xlog {
             DWORD newest_record{0};
 
             if (!GetOldestEventLogRecord(event_log_handle, &oldest_record)){
-                debug::print("log-winevent", "failed to get the oldest record, error: 0x{:08X}", GetLastError());
+                debug::print("winevent", "failed to get the oldest record, error: 0x{:08X}", GetLastError());
                 return false;
             }
 
             if (!GetNumberOfEventLogRecords(event_log_handle, &newest_record)){
-                debug::print("log-winevent", "failed to get the number of records, error: 0x{:08X}", GetLastError());
+                debug::print("winevent", "failed to get the number of records, error: 0x{:08X}", GetLastError());
                 return false;
             }
 
@@ -82,15 +82,15 @@ namespace xlog {
             DWORD tail_offset{0};
             char* record{nullptr};
 
-            debug::print("log-winevent", "seeking to the end");
+            debug::print("winevent", "seeking to the end");
 
             if (!get_tail_record_offset(event_log_handle, tail_offset)) {
-                debug::print("log-winevent", "failed to get the number of the last record");
+                debug::print("winevent", "failed to get the number of the last record");
                 return false;
             }
 
             if (ERROR_SUCCESS != read_record(event_log_handle, record, tail_offset, EVENTLOG_SEEK_READ | EVENTLOG_FORWARDS_READ)) {
-                debug::print("log-winevent", "failed to seek to record {}", tail_offset);
+                debug::print("winevent", "failed to seek to record {}", tail_offset);
                 return false;
             }
 
@@ -133,7 +133,7 @@ namespace xlog {
                         read_status = read_record(event_log_handle, record_buffer, 0, EVENTLOG_SEQUENTIAL_READ | EVENTLOG_FORWARDS_READ);
 
                         if (read_status != ERROR_SUCCESS && read_status != ERROR_HANDLE_EOF) {
-                            debug::print("log-winevent", "failed to read, error: 0x{:08X}", read_status);
+                            debug::print("winevent", "failed to read, error: 0x{:08X}", read_status);
                             return;
                         }
 
@@ -165,10 +165,10 @@ namespace xlog {
                                         {"description", description.str()},
                                     };
 
-                                    auto timestamp = static_cast<int64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+                                    auto timestamp{static_cast<int64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
                                     entries.push_back(std::make_tuple(identifier, timestamp, data.dump()));
                                 } catch (const std::exception& e) {
-                                    debug::print("log-winevent", "corrupted record, error: {}", e.what());
+                                    debug::print("winevent", "corrupted record, error: {}", e.what());
                                 }
                             }
                         }
@@ -178,7 +178,7 @@ namespace xlog {
                         auto value{*entry};
 
                         if (config::field_verbose) {
-                            debug::print("log-winevent", "event received, details: '{}'", std::get<2>(value));
+                            debug::print("winevent", "event received, details: '{}'", std::get<2>(value));
                         }
 
                         xlog::queue::insert(value);
@@ -194,20 +194,20 @@ namespace xlog {
             HANDLE event_log_handle{OpenEventLogA(NULL, log_source_name.c_str())};
 
             if (event_log_handle == NULL) {
-                debug::print("log-winevent", "failed to open '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
+                debug::print("winevent", "failed to open '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
                 return;
             }
 
             HANDLE wait_event{CreateEvent(NULL, TRUE, FALSE, NULL)};
 
             if (wait_event == NULL) {
-                debug::print("log-winevent", "failed to create wait event for '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
+                debug::print("winevent", "failed to create wait event for '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
                 CloseEventLog(event_log_handle);
                 return;
             }
 
             if (!NotifyChangeEventLog(event_log_handle, wait_event)) {
-                debug::print("log-winevent", "failed to set waiting event for '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
+                debug::print("winevent", "failed to set waiting event for '{}' log, error: 0x{:08X}", log_source_name, GetLastError());
                 CloseHandle(wait_event);
                 CloseEventLog(event_log_handle);
                 return;
@@ -222,7 +222,7 @@ namespace xlog {
     #ifdef _WIN32
         bool start(std::string identifier, std::string source_name) {
             xlog::winevent::g_worker_routines.push_back(std::async(xlog::winevent::worker, identifier, source_name));
-            debug::print("log-winevent", "started on source '{}'", source_name);
+            debug::print("winevent", "started on source '{}'", source_name);
 
             return true;
         }
