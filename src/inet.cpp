@@ -22,7 +22,7 @@ namespace inet {
     static std::condition_variable g_connection_fault{};
 
     bool send_log(std::string log_identifier, int64_t log_timestamp, std::string log_data) {
-        if (!inet::g_connected) {
+        if (!inet::g_connected || !g_ssl_stream) {
             return false;
         }
 
@@ -126,6 +126,9 @@ namespace inet {
                     inet::client_procedure(ssl_stream);
                     inet::g_connected = false;
                     debug::print("inet", "stream closed");
+                    inet::g_ssl_stream = nullptr;
+
+                    break;
                 }
             } catch (const std::exception& e) {
                 debug::print("inet", "exception occured: {}; trying again after 10 seconds", e.what());
