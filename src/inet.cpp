@@ -8,23 +8,27 @@
 #include <condition_variable>
 #include <exception>
 #include <filesystem>
+#include <functional>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include "debug.hpp"
 #include "config.hpp"
 #include "nlohmann/json.hpp"
 
 namespace inet {
-    static boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* g_ssl_stream = nullptr;
+    static std::optional<std::reference_wrapper<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>> g_ssl_stream = std::nullopt;
 
     static bool g_connected{false};
     std::mutex  g_connection_fault_mutex{};
     static std::condition_variable g_connection_fault{};
 
     bool send_log(std::string log_identifier, int64_t log_timestamp, std::string log_data) {
-        if (!inet::g_connected || !g_ssl_stream) {
+        if (!inet::g_connected || !inet::g_ssl_stream.has_value()) {
             return false;
         }
+
+        auto& ssl_stream = inet::g_ssl_stream.value().get();
 
         nlohmann::json authenticate_json = {
             {"command", "log"},
@@ -40,7 +44,7 @@ namespace inet {
         std::vector<char> authenticate_blob(authenticate_json_str.begin(), authenticate_json_str.end());
 
         boost::system::error_code ec;
-        boost::asio::write(*inet::g_ssl_stream, boost::asio::buffer(authenticate_blob), ec);
+        boost::asio::write(ssl_stream, boost::asio::buffer(authenticate_blob), ec);
 
         if (ec) {
             debug::print("inet", "failed to send log due to {}", ec.message());
@@ -122,11 +126,11 @@ namespace inet {
 
                     debug::print("inet", "connected to {}:{}", remote_address, remote_port);
 
-                    inet::g_ssl_stream = &ssl_stream;
+                    inet::g_ssl_stream = ssl_stream;
                     inet::client_procedure(ssl_stream);
                     inet::g_connected = false;
                     debug::print("inet", "stream closed");
-                    inet::g_ssl_stream = nullptr;
+                    inet::g_ssl_stream = std::nullopt;
 
                     break;
                 }
