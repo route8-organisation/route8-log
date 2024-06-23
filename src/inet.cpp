@@ -55,22 +55,41 @@ namespace inet {
         }
 
         auto& ssl_stream{inet::g_ssl_stream.value().get()};
+        std::string result_buffer{};
 
-        boost::system::error_code ec;
-        boost::asio::streambuf streambuf;
-        boost::asio::read(ssl_stream, streambuf, ec);
+        while (true) {
+            boost::system::error_code ec;
+            boost::asio::streambuf streambuf;
+            boost::asio::read(ssl_stream, streambuf, ec);
 
-        if (ec && ec != boost::asio::error::eof && ec != boost::asio::ssl::error::stream_truncated) {
-            debug::print("inet", "failed to receive due to {}", ec.message());
-            inet::g_connection_fault.notify_all();
+            if (ec && ec != boost::asio::error::eof && ec != boost::asio::ssl::error::stream_truncated) {
+                debug::print("inet", "failed to receive due to {}", ec.message());
+                inet::g_connection_fault.notify_all();
 
-            return false;
-        }
+                return false;
+            }
 
-        auto result_buffer{std::string(boost::asio::buffer_cast<const char*>(streambuf.data()), streambuf.size())};
+            std::string buffer(boost::asio::buffer_cast<const char*>(streambuf.data()), streambuf.size());
+            auto eof{buffer.find("\0")};
 
-        if (!result_buffer.empty()) {
-            result_buffer.pop_back();
+            if (eof == std::string::npos) {
+                if (result_buffer.length() + buffer.length() >= config::field_maximum_receive_size) {
+                    debug::print("inet", "received passed the receive limit");
+
+                    return false;
+                }
+
+                result_buffer += buffer;
+            } else {
+                if (result_buffer.length() + eof >= config::field_maximum_receive_size) {
+                    debug::print("inet", "received passed the receive limit");
+
+                    return false;
+                }
+
+                result_buffer += std::string(buffer.begin(), buffer.begin() + (eof - 1));
+                break;
+            }
         }
 
         data = result_buffer;

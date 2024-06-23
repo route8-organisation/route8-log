@@ -15,6 +15,7 @@ namespace config {
     extern std::string field_remote_certificate;
     extern std::string field_identity;
     extern std::string field_identity_password;
+    extern size_t      field_maximum_receive_size;
 
     bool initialize();
 }

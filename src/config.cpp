@@ -15,6 +15,7 @@ namespace config {
     std::string field_remote_certificate{};
     std::string field_identity{};
     std::string field_identity_password{};
+    size_t      field_maximum_receive_size{};
 
     template<typename T>
     static bool load_config_key(YAML::Node& config, const char* key_name, T& value) {
@@ -67,6 +68,7 @@ namespace config {
         LOAD_CONFIG_KEY_VALUE("remote_certificate", config::field_remote_certificate);
         LOAD_CONFIG_KEY_VALUE("identity", config::field_identity);
         LOAD_CONFIG_KEY_VALUE("identity_password", config::field_identity_password);
+        LOAD_CONFIG_KEY_VALUE("maximum_receive_size", config::field_maximum_receive_size);
 
         #undef LOAD_CONFIG_KEY_VALUE
 
