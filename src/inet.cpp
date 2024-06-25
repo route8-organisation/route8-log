@@ -104,7 +104,6 @@ namespace inet {
 
         nlohmann::json data_json = {
             {"command", "log"},
-            {"identity", config::field_identity},
             {"data", {
                 {"identifier", log_identifier},
                 {"timestamp", log_timestamp},
